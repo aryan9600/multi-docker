@@ -1,0 +1,22 @@
+sudo: required
+services: 
+  - docker
+
+before_install:
+  - docker build -t aryan9600/client-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run aryan9600/client-test npm test -- --coverage
+
+after_success:
+  - docker build -t aryan9600/multi-client ./client
+  - docker build -t aryan9600/multi-nginx ./nginx
+  - docker build -t aryan9600/multi-server ./server
+  - docker build -t aryan9600/multi-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push aryan9600/multi-client
+  - docker push aryan9600/multi-nginx
+  - docker push aryan9600/multi-server
+  - docker push aryan9600/multi-worker
+  
+  
